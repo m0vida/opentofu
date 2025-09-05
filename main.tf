@@ -1,46 +1,14 @@
-terraform {
-  required_providers {
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.6"
-    }
-  }
+variable "prefix"       { type = string  default = "" }
+variable "length"       { type = number  default = 2 }
+variable "token_length" { type = number  default = 16  sensitive = true }
+
+module "pet" {
+  source       = "./modules/pet"
+  prefix       = var.prefix
+  length       = var.length
+  token_length = var.token_length
 }
 
-provider "random" {}
-
-variable "prefix" {
-  type        = string
-  description = "Προαιρετικό prefix για το pet name"
-  default     = ""
-}
-
-variable "token_length" {
-  type        = number
-  description = "Μήκος demo token (θα εμφανιστεί ως sensitive)"
-  default     = 16
-  sensitive   = true
-}
-
-locals {
-  computed_prefix = var.prefix != "" ? "${var.prefix}-" : ""
-}
-
-resource "random_pet" "demo" {
-  length    = 2
-  separator = "-"
-}
-
-resource "random_password" "token" {
-  length  = var.token_length
-  special = false
-}
-
-output "pet_name" {
-  value = "${local.computed_prefix}${random_pet.demo.id}"
-}
-
-output "access_token" {
-  value     = random_password.token.result
-  sensitive = true   # << Κρυφό σε plan/apply logs & outputs
-}
+output "pet_name"   { value = module.pet.pet_name }
+output "access_token" { value = module.pet.access_token  sensitive = true }
+output "workspace"  { value = terraform.workspace }
