@@ -1,1 +1,2 @@
-prefix = "dev"
+prefix       = "dev"
+token_length = 20
